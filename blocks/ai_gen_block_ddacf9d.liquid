@@ -1,0 +1,893 @@
+{% doc %}
+  @prompt
+    Create a premium ecommerce product slider exactly like a modern “Newly In” product rail. Requirements: Total products: 9 Visible at a time: 4 product cards Autoplay every 3 seconds Sliding behavior must be shift-by-one (not page-based): On each slide, the first visible product slides out The 5th product enters as the 4th card After the 9th product, the loop must feel seamless: 9th product shifts left (4th → 3rd → 2nd) 1st product re-enters from the right and becomes the last visible card Continuous, infinite loop with no jump or reset flash Card layout (must match exactly): Product image centered, fixed size, consistent ratio across all cards Top-left: rounded pill showing product tag / collection name Top-right: rating pill (e.g., 4.8 ★) Product name bold Pricing row aligned to match visual balance: Price on the left side of the card (primary focus) Compare-at price struck through (if present) Offer row below price: On the right side: black pill text “₹100 Extra Off” Next to it: green text “At Checkout” Visual style: Clean, premium, Apple/Boat-style UI Rounded cards, soft background Smooth horizontal animation (no snapping) Desktop-first layout, exact spacing and alignment Tech constraints: Shopify-compatible section No default carousel libraries CSS + JavaScript based infinite slider Performance-optimized and production-ready i wanna add some products which while im touching this means it will goes to the specific product
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-premium-slider-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.section_padding_top }}px 0 {{ block.settings.section_padding_bottom }}px;
+    background-color: {{ block.settings.background_color }};
+    overflow: hidden;
+  }
+
+  .ai-premium-slider__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.container_width }}px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .ai-premium-slider__header-{{ ai_gen_id }} {
+    margin-bottom: 32px;
+  }
+
+  .ai-premium-slider__title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.title_color }};
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  .ai-premium-slider__viewport-{{ ai_gen_id }} {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .ai-premium-slider__track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .ai-premium-slider__card-{{ ai_gen_id }} {
+    flex: 0 0 calc((100% - ({{ block.settings.card_gap }}px * 3)) / 4);
+    background: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_radius }}px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .ai-premium-slider__card-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .ai-premium-slider__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-top: {{ block.settings.image_aspect_ratio }}%;
+    background: {{ block.settings.image_background }};
+    overflow: hidden;
+  }
+
+  .ai-premium-slider__image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-premium-slider__image-placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+  }
+
+  .ai-premium-slider__image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-premium-slider__tag-{{ ai_gen_id }} {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: {{ block.settings.tag_background }};
+    color: {{ block.settings.tag_text_color }};
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 2;
+  }
+
+  .ai-premium-slider__rating-{{ ai_gen_id }} {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: {{ block.settings.rating_background }};
+    color: {{ block.settings.rating_text_color }};
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+  }
+
+  .ai-premium-slider__content-{{ ai_gen_id }} {
+    padding: 16px;
+  }
+
+  .ai-premium-slider__product-name-{{ ai_gen_id }} {
+    font-size: {{ block.settings.product_name_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.product_name_color }};
+    margin: 0 0 12px 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .ai-premium-slider__price-row-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .ai-premium-slider__price-{{ ai_gen_id }} {
+    font-size: {{ block.settings.price_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.price_color }};
+  }
+
+  .ai-premium-slider__compare-price-{{ ai_gen_id }} {
+    font-size: {{ block.settings.compare_price_size }}px;
+    color: {{ block.settings.compare_price_color }};
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  .ai-premium-slider__offer-row-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .ai-premium-slider__offer-pill-{{ ai_gen_id }} {
+    background: {{ block.settings.offer_pill_background }};
+    color: {{ block.settings.offer_pill_text_color }};
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .ai-premium-slider__checkout-text-{{ ai_gen_id }} {
+    color: {{ block.settings.checkout_text_color }};
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-premium-slider__card-{{ ai_gen_id }} {
+      flex: 0 0 calc((100% - ({{ block.settings.card_gap }}px * 2)) / 3);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-premium-slider__card-{{ ai_gen_id }} {
+      flex: 0 0 calc((100% - {{ block.settings.card_gap }}px) / 2);
+    }
+
+    .ai-premium-slider__title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+  }
+{% endstyle %}
+
+<premium-product-slider-{{ ai_gen_id }} class="ai-premium-slider-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-premium-slider__container-{{ ai_gen_id }}">
+    {% if block.settings.section_title != blank %}
+      <div class="ai-premium-slider__header-{{ ai_gen_id }}">
+        <h2 class="ai-premium-slider__title-{{ ai_gen_id }}">{{ block.settings.section_title }}</h2>
+      </div>
+    {% endif %}
+
+    <div class="ai-premium-slider__viewport-{{ ai_gen_id }}">
+      <div class="ai-premium-slider__track-{{ ai_gen_id }}" data-slider-track>
+        {% for i in (1..9) %}
+          {% liquid
+            assign product_key = 'product_' | append: i
+            assign product = block.settings[product_key]
+            assign tag_key = 'product_' | append: i | append: '_tag'
+            assign tag = block.settings[tag_key]
+            assign rating_key = 'product_' | append: i | append: '_rating'
+            assign rating = block.settings[rating_key]
+            assign offer_key = 'product_' | append: i | append: '_offer'
+            assign offer = block.settings[offer_key]
+          %}
+
+          {% if product != blank %}
+            <a href="{{ product.url }}" class="ai-premium-slider__card-{{ ai_gen_id }}" data-product-card>
+              <div class="ai-premium-slider__image-wrapper-{{ ai_gen_id }}">
+                {% if product.featured_image %}
+                  <img
+                    src="{{ product.featured_image | image_url: width: 600 }}"
+                    alt="{{ product.featured_image.alt | escape }}"
+                    class="ai-premium-slider__image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="{{ 600 | times: block.settings.image_aspect_ratio | divided_by: 100 }}"
+                  >
+                {% else %}
+                  <div class="ai-premium-slider__image-placeholder-{{ ai_gen_id }}">
+                    {{ 'product-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+
+                {% if tag != blank %}
+                  <div class="ai-premium-slider__tag-{{ ai_gen_id }}">{{ tag }}</div>
+                {% endif %}
+
+                {% if rating != blank %}
+                  <div class="ai-premium-slider__rating-{{ ai_gen_id }}">
+                    {{ rating }} ★
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="ai-premium-slider__content-{{ ai_gen_id }}">
+                <h3 class="ai-premium-slider__product-name-{{ ai_gen_id }}">{{ product.title }}</h3>
+
+                <div class="ai-premium-slider__price-row-{{ ai_gen_id }}">
+                  <span class="ai-premium-slider__price-{{ ai_gen_id }}">{{ product.price | money }}</span>
+                  {% if product.compare_at_price > product.price %}
+                    <span class="ai-premium-slider__compare-price-{{ ai_gen_id }}">{{ product.compare_at_price | money }}</span>
+                  {% endif %}
+                </div>
+
+                {% if offer != blank %}
+                  <div class="ai-premium-slider__offer-row-{{ ai_gen_id }}">
+                    <span class="ai-premium-slider__offer-pill-{{ ai_gen_id }}">{{ offer }}</span>
+                    <span class="ai-premium-slider__checkout-text-{{ ai_gen_id }}">At Checkout</span>
+                  </div>
+                {% endif %}
+              </div>
+            </a>
+          {% else %}
+            <div class="ai-premium-slider__card-{{ ai_gen_id }}" data-product-card>
+              <div class="ai-premium-slider__image-wrapper-{{ ai_gen_id }}">
+                <div class="ai-premium-slider__image-placeholder-{{ ai_gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+                <div class="ai-premium-slider__tag-{{ ai_gen_id }}">NEW</div>
+                <div class="ai-premium-slider__rating-{{ ai_gen_id }}">4.8 ★</div>
+              </div>
+              <div class="ai-premium-slider__content-{{ ai_gen_id }}">
+                <h3 class="ai-premium-slider__product-name-{{ ai_gen_id }}">Product {{ i }}</h3>
+                <div class="ai-premium-slider__price-row-{{ ai_gen_id }}">
+                  <span class="ai-premium-slider__price-{{ ai_gen_id }}">$99.00</span>
+                  <span class="ai-premium-slider__compare-price-{{ ai_gen_id }}">$129.00</span>
+                </div>
+                <div class="ai-premium-slider__offer-row-{{ ai_gen_id }}">
+                  <span class="ai-premium-slider__offer-pill-{{ ai_gen_id }}">₹100 Extra Off</span>
+                  <span class="ai-premium-slider__checkout-text-{{ ai_gen_id }}">At Checkout</span>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</premium-product-slider-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PremiumProductSlider{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = this.querySelector('[data-slider-track]');
+        this.cards = Array.from(this.querySelectorAll('[data-product-card]'));
+        this.currentIndex = 0;
+        this.isTransitioning = false;
+        this.autoplayInterval = null;
+        this.autoplayDelay = {{ block.settings.autoplay_delay | times: 1000 }};
+        this.visibleCards = 4;
+        this.totalCards = this.cards.length;
+      }
+
+      connectedCallback() {
+        if (this.cards.length === 0) return;
+        
+        this.cloneCards();
+        this.setupAutoplay();
+        this.setupHoverPause();
+        this.updateVisibleCards();
+        window.addEventListener('resize', this.updateVisibleCards.bind(this));
+      }
+
+      disconnectedCallback() {
+        this.stopAutoplay();
+        window.removeEventListener('resize', this.updateVisibleCards.bind(this));
+      }
+
+      updateVisibleCards() {
+        const width = window.innerWidth;
+        if (width <= 749) {
+          this.visibleCards = 2;
+        } else if (width <= 989) {
+          this.visibleCards = 3;
+        } else {
+          this.visibleCards = 4;
+        }
+      }
+
+      cloneCards() {
+        const clonedCards = this.cards.map(card => card.cloneNode(true));
+        clonedCards.forEach(clone => this.track.appendChild(clone));
+      }
+
+      setupAutoplay() {
+        if ({{ block.settings.enable_autoplay }} === false) return;
+        
+        this.autoplayInterval = setInterval(() => {
+          this.slideNext();
+        }, this.autoplayDelay);
+      }
+
+      stopAutoplay() {
+        if (this.autoplayInterval) {
+          clearInterval(this.autoplayInterval);
+          this.autoplayInterval = null;
+        }
+      }
+
+      setupHoverPause() {
+        this.addEventListener('mouseenter', () => this.stopAutoplay());
+        this.addEventListener('mouseleave', () => this.setupAutoplay());
+      }
+
+      slideNext() {
+        if (this.isTransitioning) return;
+        
+        this.isTransitioning = true;
+        this.currentIndex++;
+
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = {{ block.settings.card_gap }};
+        const offset = (cardWidth + gap) * this.currentIndex;
+        
+        this.track.style.transform = `translateX(-${offset}px)`;
+
+        if (this.currentIndex >= this.totalCards) {
+          setTimeout(() => {
+            this.track.style.transition = 'none';
+            this.currentIndex = 0;
+            this.track.style.transform = 'translateX(0)';
+            
+            setTimeout(() => {
+              this.track.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+              this.isTransitioning = false;
+            }, 50);
+          }, 600);
+        } else {
+          setTimeout(() => {
+            this.isTransitioning = false;
+          }, 600);
+        }
+      }
+    }
+
+    customElements.define('premium-product-slider-{{ ai_gen_id }}', PremiumProductSlider{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Premium product slider",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "section_title",
+      "label": "Title",
+      "default": "Newly In"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 20,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 1000,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "label": "Container width",
+      "default": 1200
+    },
+    {
+      "type": "header",
+      "content": "Slider settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_autoplay",
+      "label": "Enable autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_delay",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Autoplay delay",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "label": "Card gap",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "image_aspect_ratio",
+      "min": 80,
+      "max": 150,
+      "step": 5,
+      "unit": "%",
+      "label": "Image aspect ratio",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "image_background",
+      "label": "Image background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "header",
+      "content": "Tag style"
+    },
+    {
+      "type": "color",
+      "id": "tag_background",
+      "label": "Tag background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "tag_text_color",
+      "label": "Tag text color",
+      "default": "#121212"
+    },
+    {
+      "type": "header",
+      "content": "Rating style"
+    },
+    {
+      "type": "color",
+      "id": "rating_background",
+      "label": "Rating background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "rating_text_color",
+      "label": "Rating text color",
+      "default": "#121212"
+    },
+    {
+      "type": "header",
+      "content": "Product info"
+    },
+    {
+      "type": "range",
+      "id": "product_name_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Product name size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "product_name_color",
+      "label": "Product name color",
+      "default": "#121212"
+    },
+    {
+      "type": "range",
+      "id": "price_size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Price size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price color",
+      "default": "#121212"
+    },
+    {
+      "type": "range",
+      "id": "compare_price_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Compare price size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "compare_price_color",
+      "label": "Compare price color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Offer style"
+    },
+    {
+      "type": "color",
+      "id": "offer_pill_background",
+      "label": "Offer pill background",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "offer_pill_text_color",
+      "label": "Offer pill text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "checkout_text_color",
+      "label": "Checkout text color",
+      "default": "#00a651"
+    },
+    {
+      "type": "header",
+      "content": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "product_1",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_1_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_1_rating",
+      "label": "Rating",
+      "default": "4.8"
+    },
+    {
+      "type": "text",
+      "id": "product_1_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    },
+    {
+      "type": "header",
+      "content": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "product_2",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_2_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_2_rating",
+      "label": "Rating",
+      "default": "4.7"
+    },
+    {
+      "type": "text",
+      "id": "product_2_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    },
+    {
+      "type": "header",
+      "content": "Product 3"
+    },
+    {
+      "type": "product",
+      "id": "product_3",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_3_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_3_rating",
+      "label": "Rating",
+      "default": "4.9"
+    },
+    {
+      "type": "text",
+      "id": "product_3_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    },
+    {
+      "type": "header",
+      "content": "Product 4"
+    },
+    {
+      "type": "product",
+      "id": "product_4",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_4_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_4_rating",
+      "label": "Rating",
+      "default": "4.6"
+    },
+    {
+      "type": "text",
+      "id": "product_4_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    },
+    {
+      "type": "header",
+      "content": "Product 5"
+    },
+    {
+      "type": "product",
+      "id": "product_5",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_5_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_5_rating",
+      "label": "Rating",
+      "default": "4.8"
+    },
+    {
+      "type": "text",
+      "id": "product_5_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    },
+    {
+      "type": "header",
+      "content": "Product 6"
+    },
+    {
+      "type": "product",
+      "id": "product_6",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_6_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_6_rating",
+      "label": "Rating",
+      "default": "4.7"
+    },
+    {
+      "type": "text",
+      "id": "product_6_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    },
+    {
+      "type": "header",
+      "content": "Product 7"
+    },
+    {
+      "type": "product",
+      "id": "product_7",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_7_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_7_rating",
+      "label": "Rating",
+      "default": "4.9"
+    },
+    {
+      "type": "text",
+      "id": "product_7_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    },
+    {
+      "type": "header",
+      "content": "Product 8"
+    },
+    {
+      "type": "product",
+      "id": "product_8",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_8_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_8_rating",
+      "label": "Rating",
+      "default": "4.8"
+    },
+    {
+      "type": "text",
+      "id": "product_8_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    },
+    {
+      "type": "header",
+      "content": "Product 9"
+    },
+    {
+      "type": "product",
+      "id": "product_9",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "product_9_tag",
+      "label": "Tag",
+      "default": "NEW"
+    },
+    {
+      "type": "text",
+      "id": "product_9_rating",
+      "label": "Rating",
+      "default": "4.7"
+    },
+    {
+      "type": "text",
+      "id": "product_9_offer",
+      "label": "Offer text",
+      "default": "₹100 Extra Off"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Premium product slider"
+    }
+  ]
+}
+{% endschema %}

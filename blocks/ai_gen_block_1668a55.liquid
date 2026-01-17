@@ -1,0 +1,663 @@
+{% doc %}
+  @prompt
+    Create a Shopify custom section that displays a horizontal category grid similar to a modern electronics store homepage.
+    
+    Requirements:
+    
+    Display 10 category items in one row (desktop)
+    
+    Each item includes:
+    
+    Product/category image
+    
+    Category name text below the image
+    
+    White background
+    
+    Each item must be a section block so categories can be added/removed from the admin
+    
+    Each block should include:
+    
+    Image picker
+    
+    Collection picker
+    
+    Text field for category name
+    
+    On hover:
+    
+    Image should have a smooth zoom-out effect (scale from 1.05 → 1)
+    
+    Transition should feel soft and premium
+    
+    On click:
+    
+    Entire item (image + text) navigates to the selected collection page
+    
+    Layout rules:
+    
+    Images centered
+    
+    No borders
+    
+    Equal spacing between items
+    
+    Text aligned center
+    
+    Responsive behavior:
+    
+    Desktop: 10 items in a row
+    
+    Tablet: 5 items per row
+    
+    Mobile: Horizontal scroll with swipe
+    
+    Image handling:
+    
+    Maintain aspect ratio
+    
+    No distortion
+    
+    Use object-fit: contain
+    
+    UI style:
+    
+    Clean
+    
+    White background
+    
+    Modern ecommerce look
+    
+    Compatible with Shopify Dawn theme
+    
+    Use:
+    
+    Liquid for structure
+    
+    CSS for hover animation
+    
+    No external libraries
+    
+    Output:
+    
+    Full Shopify section (.liquid)
+    
+    Schema with blocks for categories
+    
+    CSS for hover zoom effect
+    
+    Clean, production-ready code, adjust some padings, the icons are in blend in edges of squares
+    
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-category-grid-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: #ffffff;
+  }
+
+  .ai-category-grid__container-{{ ai_gen_id }} {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: {{ block.settings.padding_top }}px {{ block.settings.padding_horizontal }}px {{ block.settings.padding_bottom }}px {{ block.settings.padding_horizontal }}px;
+  }
+
+  .ai-category-grid__wrapper-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: {{ block.settings.item_spacing }}px;
+    width: 100%;
+  }
+
+  .ai-category-grid__item-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-category-grid__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border-radius: 8px;
+  }
+
+  .ai-category-grid__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scale(1.05);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ai-category-grid__item-{{ ai_gen_id }}:hover .ai-category-grid__image-{{ ai_gen_id }} {
+    transform: scale(1);
+  }
+
+  .ai-category-grid__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f8f8;
+    padding: 20%;
+  }
+
+  .ai-category-grid__placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.2;
+    fill: #121212;
+  }
+
+  .ai-category-grid__name-{{ ai_gen_id }} {
+    font-size: 14px;
+    color: #121212;
+    text-align: center;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-category-grid__wrapper-{{ ai_gen_id }} {
+      grid-template-columns: repeat(5, 1fr);
+      gap: {{ block.settings.item_spacing_tablet }}px;
+    }
+
+    .ai-category-grid__container-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_top_tablet }}px {{ block.settings.padding_horizontal_tablet }}px {{ block.settings.padding_bottom_tablet }}px {{ block.settings.padding_horizontal_tablet }}px;
+    }
+
+    .ai-category-grid__name-{{ ai_gen_id }} {
+      font-size: 13px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-category-grid__wrapper-{{ ai_gen_id }} {
+      display: flex;
+      grid-template-columns: none;
+      gap: {{ block.settings.item_spacing_mobile }}px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 8px;
+    }
+
+    .ai-category-grid__wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ai-category-grid__item-{{ ai_gen_id }} {
+      flex: 0 0 auto;
+      width: 100px;
+      scroll-snap-align: start;
+    }
+
+    .ai-category-grid__container-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_top_mobile }}px {{ block.settings.padding_horizontal_mobile }}px {{ block.settings.padding_bottom_mobile }}px {{ block.settings.padding_horizontal_mobile }}px;
+    }
+
+    .ai-category-grid__name-{{ ai_gen_id }} {
+      font-size: 12px;
+    }
+  }
+{% endstyle %}
+
+<category-grid-{{ ai_gen_id }} class="ai-category-grid-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-category-grid__container-{{ ai_gen_id }}">
+    <div class="ai-category-grid__wrapper-{{ ai_gen_id }}">
+      {% for i in (1..10) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign name_key = 'category_name_' | append: i
+          assign image_key = 'category_image_' | append: i
+          
+          assign collection = block.settings[collection_key]
+          assign category_name = block.settings[name_key]
+          assign category_image = block.settings[image_key]
+          
+          if collection != blank
+            assign link_url = collection.url
+          else
+            assign link_url = '#'
+          endif
+        %}
+        
+        <a 
+          href="{{ link_url }}" 
+          class="ai-category-grid__item-{{ ai_gen_id }}"
+        >
+          <div class="ai-category-grid__image-wrapper-{{ ai_gen_id }}">
+            {% if category_image != blank %}
+              <img
+                src="{{ category_image | image_url: width: 300 }}"
+                alt="{{ category_name | escape }}"
+                loading="lazy"
+                width="300"
+                height="300"
+                class="ai-category-grid__image-{{ ai_gen_id }}"
+              >
+            {% else %}
+              <div class="ai-category-grid__placeholder-{{ ai_gen_id }}">
+                {{ 'product-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+          
+          {% if category_name != blank %}
+            <span class="ai-category-grid__name-{{ ai_gen_id }}">
+              {{ category_name }}
+            </span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</category-grid-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CategoryGrid{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.setupMobileScroll();
+      }
+
+      setupMobileScroll() {
+        const wrapper = this.querySelector('.ai-category-grid__wrapper-{{ ai_gen_id }}');
+        if (!wrapper) return;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        wrapper.addEventListener('mousedown', (e) => {
+          if (window.innerWidth > 749) return;
+          isDown = true;
+          wrapper.style.cursor = 'grabbing';
+          startX = e.pageX - wrapper.offsetLeft;
+          scrollLeft = wrapper.scrollLeft;
+        });
+
+        wrapper.addEventListener('mouseleave', () => {
+          isDown = false;
+          wrapper.style.cursor = 'grab';
+        });
+
+        wrapper.addEventListener('mouseup', () => {
+          isDown = false;
+          wrapper.style.cursor = 'grab';
+        });
+
+        wrapper.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - wrapper.offsetLeft;
+          const walk = (x - startX) * 2;
+          wrapper.scrollLeft = scrollLeft - walk;
+        });
+      }
+    }
+
+    customElements.define('category-grid-{{ ai_gen_id }}', CategoryGrid{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Category grid",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Desktop spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "item_spacing",
+      "min": 4,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "label": "Item spacing",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Tablet spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_tablet",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_tablet",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_tablet",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "item_spacing_tablet",
+      "min": 4,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "label": "Item spacing",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Mobile spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "item_spacing_mobile",
+      "min": 4,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "label": "Item spacing",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Category 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_1",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_1",
+      "label": "Name",
+      "default": "Electronics"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_2",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_2",
+      "label": "Name",
+      "default": "Accessories"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_3",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_3",
+      "label": "Name",
+      "default": "Audio"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_4",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_4",
+      "label": "Name",
+      "default": "Cameras"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_5",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_5",
+      "label": "Name",
+      "default": "Computers"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_6",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_6",
+      "label": "Name",
+      "default": "Gaming"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 7"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_7",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_7",
+      "label": "Name",
+      "default": "Smart Home"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 8"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_8",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_8",
+      "label": "Name",
+      "default": "Wearables"
+    },
+    {
+      "type": "collection",
+      "id": "collection_8",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 9"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_9",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_9",
+      "label": "Name",
+      "default": "Phones"
+    },
+    {
+      "type": "collection",
+      "id": "collection_9",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 10"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_image_10",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "category_name_10",
+      "label": "Name",
+      "default": "Tablets"
+    },
+    {
+      "type": "collection",
+      "id": "collection_10",
+      "label": "Collection"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category grid"
+    }
+  ]
+}
+{% endschema %}

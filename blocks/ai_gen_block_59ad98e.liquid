@@ -1,0 +1,399 @@
+{% doc %}
+  @prompt
+    Layout:
+    
+    One image aligned to the left
+    
+    One image aligned to the center
+    
+    One image aligned to the right
+    
+    White background for the entire section
+    
+    Each image is purely decorative
+    
+    No links
+    
+    No navigation
+    
+    Admin editing behavior:
+    
+    Each image should be placed inside a draggable container in the theme editor
+    
+    Allow merchants to:
+    
+    Adjust spacing visually using padding/margins
+    
+    Reposition images using alignment controls (left / center / right)
+    
+    Once saved, image positions must remain fixed on the storefront
+    
+    Section settings:
+    
+    Padding top and bottom (range sliders)
+    
+    Padding left and right (range sliders)
+    
+    Block settings (for each image):
+    
+    Image picker
+    
+    Max width control (px)
+    
+    Padding control around the image
+    
+    Alignment selector (left / center / right)
+    
+    Image handling:
+    
+    Maintain aspect ratio
+    
+    No distortion
+    
+    Use object-fit: contain
+    
+    Responsive behavior:
+    
+    Desktop: 3 images in one row
+    
+    Mobile: Stack images vertically with spacing
+    
+    UI style:
+    
+    Minimal
+    
+    Clean
+    
+    No borders
+    
+    No shadows
+    
+    Modern ecommerce aesthetic
+    
+    Use:
+    
+    Shopify Liquid
+    
+    CSS Flexbox
+    
+    No JavaScript
+    
+    No external libraries
+    
+    Output:
+    
+    Complete Shopify section (.liquid)
+    
+    Schema with blocks for three images
+    
+    Section-level padding controls
+    
+    Block-level alignment and spacing controls
+    
+    Clean, readable, production-ready code, i wanna add totally three small images, i want these images into small. i wanna more gaps inbetween them, which has small images.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-three-images-{{ ai_gen_id }} {
+    background-color: #ffffff;
+    padding: {{ block.settings.padding_top }}px {{ block.settings.padding_horizontal }}px {{ block.settings.padding_bottom }}px {{ block.settings.padding_horizontal }}px;
+    width: 100%;
+  }
+
+  .ai-three-images-container-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: {{ block.settings.gap_between_images }}px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .ai-three-images-item-{{ ai_gen_id }} {
+    flex: 1;
+    display: flex;
+    padding: {{ block.settings.image_padding }}px;
+  }
+
+  .ai-three-images-item-{{ ai_gen_id }}--left {
+    justify-content: flex-start;
+  }
+
+  .ai-three-images-item-{{ ai_gen_id }}--center {
+    justify-content: center;
+  }
+
+  .ai-three-images-item-{{ ai_gen_id }}--right {
+    justify-content: flex-end;
+  }
+
+  .ai-three-images-wrapper-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    width: 100%;
+  }
+
+  .ai-three-images-wrapper-{{ ai_gen_id }} img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  .ai-three-images-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-three-images-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: auto;
+    max-width: 150px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-three-images-container-{{ ai_gen_id }} {
+      flex-direction: column;
+      gap: {{ block.settings.gap_between_images }}px;
+    }
+
+    .ai-three-images-item-{{ ai_gen_id }} {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .ai-three-images-wrapper-{{ ai_gen_id }} {
+      max-width: {{ block.settings.max_width }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-three-images-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-three-images-container-{{ ai_gen_id }}">
+    <div class="ai-three-images-item-{{ ai_gen_id }} ai-three-images-item-{{ ai_gen_id }}--{{ block.settings.alignment_1 }}">
+      <div class="ai-three-images-wrapper-{{ ai_gen_id }}">
+        {% if block.settings.image_1 %}
+          <img
+            src="{{ block.settings.image_1 | image_url: width: 600 }}"
+            alt="{{ block.settings.image_1.alt | escape }}"
+            loading="lazy"
+            width="{{ block.settings.image_1.width }}"
+            height="{{ block.settings.image_1.height }}"
+          >
+        {% else %}
+          <div class="ai-three-images-placeholder-{{ ai_gen_id }}">
+            {{ 'image' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="ai-three-images-item-{{ ai_gen_id }} ai-three-images-item-{{ ai_gen_id }}--{{ block.settings.alignment_2 }}">
+      <div class="ai-three-images-wrapper-{{ ai_gen_id }}">
+        {% if block.settings.image_2 %}
+          <img
+            src="{{ block.settings.image_2 | image_url: width: 600 }}"
+            alt="{{ block.settings.image_2.alt | escape }}"
+            loading="lazy"
+            width="{{ block.settings.image_2.width }}"
+            height="{{ block.settings.image_2.height }}"
+          >
+        {% else %}
+          <div class="ai-three-images-placeholder-{{ ai_gen_id }}">
+            {{ 'image' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="ai-three-images-item-{{ ai_gen_id }} ai-three-images-item-{{ ai_gen_id }}--{{ block.settings.alignment_3 }}">
+      <div class="ai-three-images-wrapper-{{ ai_gen_id }}">
+        {% if block.settings.image_3 %}
+          <img
+            src="{{ block.settings.image_3 | image_url: width: 600 }}"
+            alt="{{ block.settings.image_3.alt | escape }}"
+            loading="lazy"
+            width="{{ block.settings.image_3.width }}"
+            height="{{ block.settings.image_3.height }}"
+          >
+        {% else %}
+          <div class="ai-three-images-placeholder-{{ ai_gen_id }}">
+            {{ 'image' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Three images",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding left and right",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Image settings"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 50,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "label": "Max width",
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "gap_between_images",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Gap between images",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "image_padding",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Image padding",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Image 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "alignment_1",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Image 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "alignment_2",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Image 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "alignment_3",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "right"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Three images"
+    }
+  ]
+}
+{% endschema %}

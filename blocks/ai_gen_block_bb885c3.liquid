@@ -1,0 +1,408 @@
+{% doc %}
+  @prompt
+    Create a custom Shopify section named “Artisan Love Banner” that visually matches a premium brand header like “DIPPED IN LOVE”.
+    
+    Section requirements:
+    
+    • Center-aligned layout on a white background
+    • Main heading text (example: “DIPPED IN LOVE”)
+    • Optional left and right heart icons beside the heading
+    • Subtitle text below the heading
+    
+    Theme Customizer controls MUST include:
+    
+    Text controls
+    
+    Heading text (text field)
+    
+    Subtitle text (text field)
+    
+    Typography controls
+    
+    Font picker for heading
+    
+    Font picker for subtitle
+    
+    Font size slider for heading (px)
+    
+    Font size slider for subtitle (px)
+    
+    Font weight selector (light / regular / medium / bold)
+    
+    Letter spacing slider for heading
+    
+    Color controls
+    
+    Heading color picker
+    
+    Subtitle color picker
+    
+    Background color picker
+    
+    Layout controls
+    
+    Section padding top & bottom (range sliders)
+    
+    Max content width selector (boxed / full width)
+    
+    Text alignment selector (left / center / right)
+    
+    Behavior:
+    
+    Fully editable via Theme Customizer (no hard-coded values)
+    
+    Clean, modern, luxury aesthetic
+    
+    Responsive for desktop and mobile
+    
+    Use CSS variables linked to section settings
+    
+    No external libraries
+    
+    Deliver:
+    
+    Complete .liquid section file
+    
+    Proper Shopify schema with all settings exposed
+    
+    Production-ready code
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .artisan-love-banner-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding-top: {{ block.settings.padding_top }}px;
+    padding-bottom: {{ block.settings.padding_bottom }}px;
+  }
+
+  .artisan-love-banner__container-{{ ai_gen_id }} {
+    {% if block.settings.max_width == 'boxed' %}
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-left: 20px;
+      padding-right: 20px;
+    {% else %}
+      width: 100%;
+      padding-left: 20px;
+      padding-right: 20px;
+    {% endif %}
+  }
+
+  .artisan-love-banner__content-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: {{ block.settings.text_alignment }};
+    text-align: {{ block.settings.text_alignment }};
+    gap: 12px;
+  }
+
+  .artisan-love-banner__heading-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: {{ block.settings.text_alignment }};
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .artisan-love-banner__heart-icon-{{ ai_gen_id }} {
+    width: {{ block.settings.heading_font_size }}px;
+    height: {{ block.settings.heading_font_size }}px;
+    flex-shrink: 0;
+    fill: {{ block.settings.heading_color }};
+  }
+
+  .artisan-love-banner__heading-{{ ai_gen_id }} {
+    margin: 0;
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    font-style: {{ block.settings.heading_font.style }};
+    font-size: {{ block.settings.heading_font_size }}px;
+    color: {{ block.settings.heading_color }};
+    letter-spacing: {{ block.settings.heading_letter_spacing }}px;
+    line-height: 1.2;
+  }
+
+  .artisan-love-banner__subtitle-{{ ai_gen_id }} {
+    margin: 0;
+    font-family: {{ block.settings.subtitle_font.family }}, {{ block.settings.subtitle_font.fallback_families }};
+    font-weight: {{ block.settings.subtitle_font.weight }};
+    font-style: {{ block.settings.subtitle_font.style }};
+    font-size: {{ block.settings.subtitle_font_size }}px;
+    color: {{ block.settings.subtitle_color }};
+    line-height: 1.5;
+  }
+
+  @media screen and (max-width: 749px) {
+    .artisan-love-banner__heading-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.heading_font_size }}px * 0.7);
+    }
+
+    .artisan-love-banner__subtitle-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.subtitle_font_size }}px * 0.85);
+    }
+
+    .artisan-love-banner__heart-icon-{{ ai_gen_id }} {
+      width: calc({{ block.settings.heading_font_size }}px * 0.7);
+      height: calc({{ block.settings.heading_font_size }}px * 0.7);
+    }
+
+    .artisan-love-banner__heading-wrapper-{{ ai_gen_id }} {
+      gap: 12px;
+    }
+  }
+{% endstyle %}
+
+<artisan-love-banner-{{ ai_gen_id }}
+  class="artisan-love-banner-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="artisan-love-banner__container-{{ ai_gen_id }}">
+    <div class="artisan-love-banner__content-{{ ai_gen_id }}">
+      {% if block.settings.heading_text != blank %}
+        <div class="artisan-love-banner__heading-wrapper-{{ ai_gen_id }}">
+          {% if block.settings.show_left_heart %}
+            <svg
+              class="artisan-love-banner__heart-icon-{{ ai_gen_id }}"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          {% endif %}
+
+          <h2 class="artisan-love-banner__heading-{{ ai_gen_id }}">
+            {{ block.settings.heading_text }}
+          </h2>
+
+          {% if block.settings.show_right_heart %}
+            <svg
+              class="artisan-love-banner__heart-icon-{{ ai_gen_id }}"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if block.settings.subtitle_text != blank %}
+        <p class="artisan-love-banner__subtitle-{{ ai_gen_id }}">
+          {{ block.settings.subtitle_text }}
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</artisan-love-banner-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ArtisanLoveBanner{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.loadFonts();
+      }
+
+      loadFonts() {
+        const headingFont = this.querySelector('.artisan-love-banner__heading-{{ ai_gen_id }}');
+        const subtitleFont = this.querySelector('.artisan-love-banner__subtitle-{{ ai_gen_id }}');
+
+        if (headingFont && headingFont.style.fontFamily) {
+          document.fonts.load(headingFont.style.fontFamily);
+        }
+
+        if (subtitleFont && subtitleFont.style.fontFamily) {
+          document.fonts.load(subtitleFont.style.fontFamily);
+        }
+      }
+    }
+
+    customElements.define('artisan-love-banner-{{ ai_gen_id }}', ArtisanLoveBanner{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Artisan love banner",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text content"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Heading text",
+      "default": "DIPPED IN LOVE"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_text",
+      "label": "Subtitle text",
+      "default": "Handcrafted with passion and care"
+    },
+    {
+      "type": "header",
+      "content": "Heading typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "min": 16,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading font size",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "px",
+      "label": "Heading letter spacing",
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Subtitle typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "subtitle_font",
+      "label": "Subtitle font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size",
+      "min": 12,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtitle font size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Heart icons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_left_heart",
+      "label": "Show left heart icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_right_heart",
+      "label": "Show right heart icon",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "max_width",
+      "label": "Max content width",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "Boxed"
+        },
+        {
+          "value": "full",
+          "label": "Full width"
+        }
+      ],
+      "default": "boxed"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Artisan love banner"
+    }
+  ]
+}
+{% endschema %}
